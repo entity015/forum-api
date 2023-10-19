@@ -13,6 +13,7 @@ describe("CommentRepositoryPostgres implementation", () => {
 		await CommentsTableTestHelper.cleanTable()
 		await UsersTableTestHelper.cleanTable()
 		await ThreadCommentsTableTestHelper.cleanTable()
+		await ThreadsTableTestHelper.cleanTable()
 	})
 
 	afterAll(async () => {

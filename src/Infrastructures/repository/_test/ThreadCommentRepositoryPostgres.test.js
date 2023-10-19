@@ -7,8 +7,10 @@ const ThreadCommentRepositoryPostgres = require("../ThreadCommentRepositoryPostg
 
 describe("ThreadCommentPostgres implementation", () => {
 	afterEach(async () => {
-		await UsersTableTestHelper.cleanTable()
+		await ThreadCommentsTableTestHelper.cleanTable()
 		await ThreadsTableTestHelper.cleanTable()
+		await CommentsTableTestHelper.cleanTable()
+		await UsersTableTestHelper.cleanTable()
 	})
 
 	afterAll(async () => {

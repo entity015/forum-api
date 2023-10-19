@@ -1,3 +1,4 @@
+const ReplyRepository = require("../../../Domains/replies/ReplyRepository")
 const CommentRepository = require("../../../Domains/comments/CommentRepository")
 const ThreadRepository = require("../../../Domains/threads/ThreadRepository")
 const SeeDetailedThreadUseCase = require("../SeeDetailedThreadUseCase")
@@ -45,18 +46,33 @@ describe("SeeDetailedThreadUseCase", () => {
 				username: "testing",
 			}
 		]
+		const mockReplies = [
+			{
+				id: "reply-123",
+				content: "Test",
+				owner: "user-123",
+				date: now,
+				is_deleted: false,
+				username: "testing",
+			}
+		]
 		const mockThreadRepository = new ThreadRepository()
 		const mockCommentRepository = new CommentRepository()
+		const mockReplyRepository = new ReplyRepository()
 		mockThreadRepository.getThreadById = jest.fn()
 			.mockImplementation(() => Promise.resolve(mockThread))
 		mockCommentRepository.getCommentsByThreadId = jest.fn()
 			.mockImplementation(() => Promise.resolve(mockComments))
+		mockReplyRepository.getRepliesByCommentId = jest.fn()
+			.mockImplementation(() => Promise.resolve(mockReplies))
 
 		const seeDetailedThreadUseCase = new SeeDetailedThreadUseCase({
 			threadRepository: mockThreadRepository,
 			commentRepository: mockCommentRepository,
+			replyRepository: mockReplyRepository,
 		})
 		const spyTranslateComment = jest.spyOn(seeDetailedThreadUseCase, "_translateCommentModel")
+		const spyTranslateReply = jest.spyOn(seeDetailedThreadUseCase, "_translateReplyModel")
 
 		// Action
 		const detailedThread = await seeDetailedThreadUseCase.execute(useCasePaylod)
@@ -67,6 +83,8 @@ describe("SeeDetailedThreadUseCase", () => {
 		expect(mockCommentRepository.getCommentsByThreadId)
 			.toBeCalledWith(useCasePaylod.threadId)
 		expect(spyTranslateComment)
+			.toHaveBeenCalledTimes(1)
+		expect(spyTranslateReply)
 			.toHaveBeenCalledTimes(1)
 		expect(detailedThread).toStrictEqual({
 			id: "thread-123",
@@ -80,6 +98,14 @@ describe("SeeDetailedThreadUseCase", () => {
 					content: "**komentar telah dihapus**",
 					username: "testing",
 					date: now,
+					replies: [
+						{
+							id: "reply-123",
+							content: "Test",
+							username: "testing",
+							date: now,
+						}
+					]
 				}
 			],
 		})

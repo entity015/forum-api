@@ -2,12 +2,35 @@ const Hapi = require("@hapi/hapi")
 const ClientError = require("../../Commons/exceptions/ClientError")
 const DomainErrorTranslator = require("../../Commons/exceptions/DomainErrorTranslator")
 const users = require("../../Interfaces/http/api/users")
+const threads = require("../../Interfaces/http/api/threads")
+const comments = require("../../Interfaces/http/api/comments")
 const authentications = require("../../Interfaces/http/api/authentications")
+const Jwt = require("@hapi/jwt")
 
 const createServer = async (container) => {
 	const server = Hapi.server({
 		host: process.env.HOST,
 		port: process.env.PORT,
+	})
+
+	await server.register([
+		{
+			plugin: Jwt,
+		},
+	])
+	
+	server.auth.strategy("forumapi_jwt", "jwt", {
+		keys: process.env.ACCESS_TOKEN_KEY,
+		verify: {
+			aud: false,
+			iss: false,
+			sub: false,
+			maxAgeSec: 1800,
+		},
+		validate: (artifacts) => ({
+			isValid: true,
+			credentials: { id: artifacts.decoded.payload.id },
+		}),
 	})
 
 	await server.register([
@@ -19,17 +42,24 @@ const createServer = async (container) => {
 			plugin: authentications,
 			options: { container },
 		},
+		{
+			plugin: threads,
+			options: { container }
+		},
+		{
+			plugin: comments,
+			options: { container }
+		},
 	])
 
 	server.ext("onPreResponse", (request, h) => {
-		// mendapatkan konteks response dari request
 		const { response } = request
 
 		if (response instanceof Error) {
 			// bila response tersebut error, tangani sesuai kebutuhan
 			const translatedError = DomainErrorTranslator.translate(response)
 
-			// penanganan client error secara internal.
+			// user defined
 			if (translatedError instanceof ClientError) {
 				const newResponse = h.response({
 					status: "fail",
@@ -39,12 +69,12 @@ const createServer = async (container) => {
 				return newResponse
 			}
 
-			// mempertahankan penanganan client error oleh hapi secara native, seperti 404, etc.
+			// other client errors
 			if (!translatedError.isServer) {
 				return h.continue
 			}
 
-			// penanganan server error sesuai kebutuhan
+			// server errors
 			const newResponse = h.response({
 				status: "error",
 				message: "terjadi kegagalan pada server kami",
@@ -53,7 +83,7 @@ const createServer = async (container) => {
 			return newResponse
 		}
 
-		// jika bukan error, lanjutkan dengan response sebelumnya (tanpa terintervensi)
+		// default
 		return h.continue
 	})
 

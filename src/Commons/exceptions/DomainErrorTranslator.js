@@ -25,6 +25,10 @@ DomainErrorTranslator._directories = {
 	"DELETE_COMMENT_USE_CASE.NOT_MEET_DATA_TYPE_SPECIFICATION": new InvariantError("id komentar dan thread harus berupa string"),
 	"SEE_DETAILED_THREAD_USE_CASE.NOT_CONTAIN_THREAD_ID": new InvariantError("harus mengirimkan id thread"),
 	"SEE_DETAILED_THREAD_USE_CASE.NOT_MEET_DATA_TYPE_SPECIFICATION": new InvariantError("id thread harus berupa string"),
+	"ADD_REPLY_USE_CASE.NOT_CONTAIN_CONTENT": new InvariantError("harus mengirimkan balasan beserta id thread dan id komentar"),
+	"ADD_REPLY_USE_CASE.NOT_MEET_DATA_TYPE_SPECIFICATION": new InvariantError("balasan harus berupa string"),
+	"DELETE_REPLY_USE_CASE.NOT_CONTAIN_NEEDED_PROPERTY": new InvariantError("harus mengirimkan id balasan beserta id komentar dan id thread"),
+	"DELETE_REPLY_USE_CASE.NOT_MEET_DATA_TYPE_SPECIFICATION": new InvariantError("id balasan beserta id komentar dan id thread harus berupa string"),
 }
 
 module.exports = DomainErrorTranslator

@@ -17,12 +17,8 @@ const ThreadRepository = require("../Domains/threads/ThreadRepository")
 const ThreadRepositoryPostgres = require("./repository/ThreadRepositoryPostgres")
 const CommentRepository = require("../Domains/comments/CommentRepository")
 const CommentRepositoryPostgres = require("./repository/CommentRepositoryPostgres")
-const ThreadCommentRepository = require("../Domains/thread_comments/ThreadCommentRepository")
-const ThreadCommentRepositoryPostgres = require("./repository/ThreadCommentRepositoryPostgres")
 const ReplyRepository = require("../Domains/replies/ReplyRepository")
 const ReplyRepositoryPostgres = require("./repository/ReplyRepositoryPostgres")
-const CommentReplyRepository = require("../Domains/comment_replies/CommentReplyRepository")
-const CommentReplyRepositoryPostgres = require("./repository/CommentReplyRepositoryPostgres")
 
 const PasswordHash = require("../Applications/security/PasswordHash")
 const BcryptPasswordHash = require("./security/BcryptPasswordHash")
@@ -114,28 +110,8 @@ container.register([
 		}
 	},
 	{
-		key: ThreadCommentRepository.name,
-		Class: ThreadCommentRepositoryPostgres,
-		parameter: {
-			dependencies: [
-				{ concrete: pool },
-				{ concrete: nanoid },
-			]
-		}
-	},
-	{
 		key: ReplyRepository.name,
 		Class: ReplyRepositoryPostgres,
-		parameter: {
-			dependencies: [
-				{ concrete: pool },
-				{ concrete: nanoid },
-			]
-		}
-	},
-	{
-		key: CommentReplyRepository.name,
-		Class: CommentReplyRepositoryPostgres,
 		parameter: {
 			dependencies: [
 				{ concrete: pool },
@@ -246,10 +222,6 @@ container.register([
 					name: "threadRepository",
 					internal: ThreadRepository.name,
 				},
-				{
-					name: "threadCommentRepository",
-					internal: ThreadCommentRepository.name,
-				},
 			]
 		}
 	},
@@ -283,10 +255,6 @@ container.register([
 				{
 					name: "threadRepository",
 					internal: ThreadRepository.name,
-				},
-				{
-					name: "commentReplyRepository",
-					internal: CommentReplyRepository.name,
 				},
 				{
 					name: "replyRepository",

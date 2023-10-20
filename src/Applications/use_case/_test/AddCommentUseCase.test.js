@@ -1,6 +1,5 @@
 const CommentRepository = require("../../../Domains/comments/CommentRepository")
 const ThreadRepository = require("../../../Domains/threads/ThreadRepository")
-const ThreadCommentRepository = require("../../../Domains/thread_comments/ThreadCommentRepository")
 const CreatedComment = require("../../../Domains/comments/entities/CreatedComment")
 const AddCommentUseCase = require("../AddCommentUseCase")
 
@@ -11,16 +10,16 @@ describe("AddCommentUseCase", () => {
 		const addCommentUseCase = new AddCommentUseCase({})
 
 		// Action & Assert
-		await expect(addCommentUseCase.execute(useCasePayload)).rejects.toThrowError("ADD_COMMENT_USE_CASE.NOT_CONTAIN_CONTENT")
+		await expect(addCommentUseCase.execute(useCasePayload)).rejects.toThrowError("NEW_COMMENT.NOT_CONTAIN_NEEDED_PROPERTY")
 	})
 
 	it("should throw error if content not string", async () => {
 		// Arrange
-		const useCasePayload = { content: true, credentialId: [], threadId: 1 }
+		const useCasePayload = { content: true }
 		const addCommentUseCase = new AddCommentUseCase({})
 
 		// Action & Assert
-		await expect(addCommentUseCase.execute(useCasePayload)).rejects.toThrowError("ADD_COMMENT_USE_CASE.NOT_MEET_DATA_TYPE_SPECIFICATION")
+		await expect(addCommentUseCase.execute(useCasePayload)).rejects.toThrowError("NEW_COMMENT.NOT_MEET_DATA_TYPE_SPECIFICATION")
 	})
 
 	it("should orchestrating add comment action correctly", async () => {
@@ -31,20 +30,24 @@ describe("AddCommentUseCase", () => {
 			content: "Test",
 			owner: "user-123",
 		})
+		const mockThread = {
+			id: "thread-123",
+			title: "Test",
+			body: "Test",
+			date: new Date().toISOString(),
+			owner: "user-123",
+			username: "testing",
+		}
 		const mockCommentRepository = new CommentRepository()
 		const mockThreadRepository = new ThreadRepository()
-		const mockThreadCommentRepository = new ThreadCommentRepository()
 		mockThreadRepository.getThreadById = jest.fn()
-			.mockImplementation(() => Promise.resolve())
+			.mockImplementation(() => Promise.resolve(mockThread))
 		mockCommentRepository.addComment = jest.fn()
 			.mockImplementation(() => Promise.resolve(mockCreatedComment))
-		mockThreadCommentRepository.addEntry = jest.fn()
-			.mockImplementation(() => Promise.resolve())
 
 		const addCommentUseCase = new AddCommentUseCase({
 			commentRepository: mockCommentRepository,
 			threadRepository: mockThreadRepository,
-			threadCommentRepository: mockThreadCommentRepository,
 		})
 
 		// Action
@@ -54,9 +57,7 @@ describe("AddCommentUseCase", () => {
 		expect(mockThreadRepository.getThreadById)
 			.toBeCalledWith(useCasePayload.threadId)
 		expect(mockCommentRepository.addComment)
-			.toBeCalledWith(useCasePayload.content, useCasePayload.credentialId)
-		expect(mockThreadCommentRepository.addEntry)
-			.toBeCalledWith(useCasePayload.threadId, createdComment.id)
+			.toBeCalledWith(useCasePayload.content, useCasePayload.credentialId, useCasePayload.threadId)
 		expect(createdComment).toStrictEqual(new CreatedComment({
 			id: "comment-123",
 			content: "Test",

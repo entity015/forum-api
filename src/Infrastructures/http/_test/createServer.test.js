@@ -42,7 +42,6 @@ describe("HTTP server", () => {
 	it("should decode jwt token", async () => {
 		// Arrange
 		const token = Jwt.token.generate({id: "user-123"}, process.env.ACCESS_TOKEN_KEY)
-		// eslint-disable-next-line no-undef
 		const server = await createServer({})
 
 		// Action

@@ -4,38 +4,40 @@ const ThreadRepository = require("../../../Domains/threads/ThreadRepository")
 const DeleteReplyUseCase = require("../DeleteReplyUseCase")
 
 describe("DeleteReplyUseCase", () => {
-	it("should throw error if use case payload not contain needed property", async () => {
-		// Arrange
-		const useCasePayload = {}
-		const deleteReplyUseCase = new DeleteReplyUseCase({})
-
-		// Action & Assert
-		await expect(deleteReplyUseCase.execute(useCasePayload))
-			.rejects.toThrowError("DELETE_REPLY_USE_CASE.NOT_CONTAIN_NEEDED_PROPERTY")
-	})
-
-	it("should throw error if use case paylaoad not meet data type specs", async () => {
-		// Arrange
-		const useCasePayload = { threadId: true, commentId: 1, replyId: 2, credentialId: [] }
-		const deleteReplyUseCase = new DeleteReplyUseCase({})
-
-		// Action & Assert
-		await expect(deleteReplyUseCase.execute(useCasePayload))
-			.rejects.toThrowError("DELETE_REPLY_USE_CASE.NOT_MEET_DATA_TYPE_SPECIFICATION")
-	})
-
 	it("should orchestrating delete reply action correctly", async () => {
 		// Arrange
 		const useCasePayload = { threadId: "thread-123", commentId: "comment-123", replyId: "reply-123", credentialId: "user-123" }
 		const mockReplyRepository = new ReplyRepository()
 		const mockCommentRepository = new CommentRepository()
 		const mockThreadRepository = new ThreadRepository()
+		const mockThread = {
+			id: "thread-123",
+			title: "Test",
+			body: "Test",
+			date: new Date().toISOString(),
+			owner: "user-123",
+			username: "testing",
+		}
+		const mockComment = {
+			id: "comment-123",
+			content: "Test",
+			owner: "user-123",
+			date: new Date().toISOString(),
+			is_deleted: false,
+		}
+		const mockReply = {
+			id: "reply-123",
+			content: "Test",
+			owner: "user-123",
+			date: new Date().toISOString(),
+			is_deleted: false,
+		}
 		mockThreadRepository.getThreadById = jest.fn()
-			.mockImplementation(() => Promise.resolve())
+			.mockImplementation(() => Promise.resolve(mockThread))
 		mockCommentRepository.getCommentById = jest.fn()
-			.mockImplementation(() => Promise.resolve())
+			.mockImplementation(() => Promise.resolve(mockComment))
 		mockReplyRepository.getReplyById = jest.fn()
-			.mockImplementation(() => Promise.resolve())
+			.mockImplementation(() => Promise.resolve(mockReply))
 		mockReplyRepository.verifyReplyOwner = jest.fn()
 			.mockImplementation(() => Promise.resolve())
 		mockReplyRepository.deleteReply = jest.fn()

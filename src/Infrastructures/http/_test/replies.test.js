@@ -72,7 +72,7 @@ describe("/replies endpoint", () => {
 			const responseJson = JSON.parse(response.payload)
 			expect(response.statusCode).toEqual(400)
 			expect(responseJson.status).toEqual("fail")
-			expect(responseJson.message).toEqual("harus mengirimkan balasan beserta id thread dan id komentar")
+			expect(responseJson.message).toEqual("harus mengirimkan konten balasan")
 		})
 
 		it("should response 400 when request payload not meet data type specification", async () => {
@@ -161,7 +161,6 @@ describe("/replies endpoint", () => {
 				strategy: "forumapi_jwt",
 				credentials: { id: "user-123" },
 			}
-			// eslint-disable-next-line no-undef
 			const server = await createServer(container)
 
 			// Action

@@ -1,5 +1,3 @@
-/* eslint-disable camelcase */
-// STRICT
 exports.up = pgm => {
 	pgm.createTable("threads", {
 		id: {

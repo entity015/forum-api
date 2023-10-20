@@ -4,26 +4,6 @@ const ThreadRepository = require("../../../Domains/threads/ThreadRepository")
 const SeeDetailedThreadUseCase = require("../SeeDetailedThreadUseCase")
 
 describe("SeeDetailedThreadUseCase", () => {
-	it("should throw error if use case payload not contain threadId", async () => {
-		// Arrange
-		const useCasePaylod = {}
-		const seeDetailedThreadUseCase = new SeeDetailedThreadUseCase({})
-
-		// Action & Assert
-		await expect(seeDetailedThreadUseCase.execute(useCasePaylod))
-			.rejects.toThrowError("SEE_DETAILED_THREAD_USE_CASE.NOT_CONTAIN_THREAD_ID")
-	})
-
-	it("should throw error if threadId not string", async () => {
-		// Arrange
-		const useCasePaylod = { threadId: [] }
-		const seeDetailedThreadUseCase = new SeeDetailedThreadUseCase({})
-
-		// Action & Assert
-		await expect(seeDetailedThreadUseCase.execute(useCasePaylod))
-			.rejects.toThrowError("SEE_DETAILED_THREAD_USE_CASE.NOT_MEET_DATA_TYPE_SPECIFICATION")
-	})
-
 	it("should throw orchestrating see detailed thread correctly", async () => {
 		// Arrange
 		const useCasePaylod = { threadId: "thread-123" }

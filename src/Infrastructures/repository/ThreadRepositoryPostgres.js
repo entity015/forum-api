@@ -29,7 +29,6 @@ class ThreadRepositoryPostgres extends ThreadRepository {
 			text: `SELECT threads.*, users.username FROM threads
 						INNER JOIN users ON threads.owner=users.id
 						WHERE threads.id = $1`,
-			// text: "SELECT * FROM threads WHERE id = $1",
 			values: [threadId],
 		}
 

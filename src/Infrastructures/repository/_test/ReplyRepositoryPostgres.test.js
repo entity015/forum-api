@@ -1,19 +1,23 @@
 const AuthorizationError = require("../../../Commons/exceptions/AuthorizationError")
 const NotFoundError = require("../../../Commons/exceptions/NotFoundError")
-const CommentsTableTestHelper = require("../../../../tests/CommentsTableTestHelper")
 const RepliesTableTestHelper = require("../../../../tests/RepliesTableTestHelper")
+const CommentsTableTestHelper = require("../../../../tests/CommentsTableTestHelper")
+const ThreadsTableTestHelper = require("../../../../tests/ThreadsTableTestHelper")
 const UsersTableTestHelper = require("../../../../tests/UsersTableTestHelper")
-const CommentRepliesTableTestHelper = require("../../../../tests/CommentRepliesTableTestHelper")
 const pool = require("../../database/postgres/pool")
 const CreatedReply = require("../../../Domains/replies/entities/CreatedReply")
 const ReplyRepositoryPostgres = require("../ReplyRepositoryPostgres")
 
 describe("ReplyRepositoryPostgres implementation", () => {
+	beforeEach(async () => {
+		await UsersTableTestHelper.addUser({id: "user-123"})
+		await ThreadsTableTestHelper.addThread({id: "thread-123", owner: "user-123"})
+	})
 	afterEach(async () => {
-		await CommentsTableTestHelper.cleanTable()
-		await UsersTableTestHelper.cleanTable()
-		await CommentRepliesTableTestHelper.cleanTable()
 		await RepliesTableTestHelper.cleanTable()
+		await CommentsTableTestHelper.cleanTable()
+		await ThreadsTableTestHelper.cleanTable()
+		await UsersTableTestHelper.cleanTable()
 	})
 
 	afterAll(async () => {
@@ -25,12 +29,10 @@ describe("ReplyRepositoryPostgres implementation", () => {
 			// Arrange
 			const fakeIdGenerator = () => "123"
 			const replyRepository = new ReplyRepositoryPostgres(pool, fakeIdGenerator)
-			const fakeOwner = "user-123"
-			const content = "Test"
 
 			// Action
-			await UsersTableTestHelper.addUser({id: fakeOwner})
-			await replyRepository.addReply(content, fakeOwner)
+			await CommentsTableTestHelper.addComment({id: "comment-123", threadId: "thread-123"})
+			await replyRepository.addReply("Test", "user-123", "comment-123")
 
 			// Assert
 			const replies = await RepliesTableTestHelper.findReplyById("reply-123")
@@ -41,12 +43,10 @@ describe("ReplyRepositoryPostgres implementation", () => {
 			// Arrange
 			const fakeIdGenerator = () => "123"
 			const replyRepository = new ReplyRepositoryPostgres(pool, fakeIdGenerator)
-			const fakeOwner = "user-123"
-			const content = "Test"
 
 			// Action
-			await UsersTableTestHelper.addUser({id: fakeOwner})
-			const createdReply = await replyRepository.addReply(content, fakeOwner)
+			await CommentsTableTestHelper.addComment({id: "comment-123", threadId: "thread-123"})
+			const createdReply = await replyRepository.addReply("Test", "user-123", "comment-123")
 
 			// Assert
 			expect(createdReply).toStrictEqual(new CreatedReply({
@@ -61,13 +61,11 @@ describe("ReplyRepositoryPostgres implementation", () => {
 		it("should throw AuthorizationError when not match owner", async () => {
 			// Arrange
 			const fakeIdGenerator = () => "123"
-			const fakeOwner = "user-123"
-			const content = "Test"
 			const replyRepository = new ReplyRepositoryPostgres(pool, fakeIdGenerator)
 
 			// Action
-			await UsersTableTestHelper.addUser({id: fakeOwner})
-			await RepliesTableTestHelper.addReply(content, fakeOwner)
+			await CommentsTableTestHelper.addComment({id: "comment-123", threadId: "thread-123"})
+			await RepliesTableTestHelper.addReply({content: "Test", owner: "user-123", commentId: "comment-123"})
 
 			// Assert
 			await expect(replyRepository.verifyReplyOwner("reply-123", "user-404"))
@@ -77,16 +75,14 @@ describe("ReplyRepositoryPostgres implementation", () => {
 		it("should not throw AuthorizationError when match owner", async () => {
 			// Arrange
 			const fakeIdGenerator = () => "123"
-			const fakeOwner = "user-123"
-			const content = "Test"
 			const replyRepository = new ReplyRepositoryPostgres(pool, fakeIdGenerator)
 
 			// Action
-			await UsersTableTestHelper.addUser({id: fakeOwner})
-			await RepliesTableTestHelper.addReply(content, fakeOwner)
+			await CommentsTableTestHelper.addComment({id: "comment-123", threadId: "thread-123"})
+			await RepliesTableTestHelper.addReply({content: "Test", owner: "user-123", commentId: "comment-123"})
 
 			// Assert
-			await expect(replyRepository.verifyReplyOwner("reply-123", fakeOwner))
+			await expect(replyRepository.verifyReplyOwner("reply-123", "user-123"))
 				.resolves.not.toThrowError(AuthorizationError)
 		})
 	})
@@ -95,12 +91,11 @@ describe("ReplyRepositoryPostgres implementation", () => {
 		it("should delete reply from database", async () => {
 			// Arrange
 			const fakeIdGenerator = () => "123"
-			const fakeOwner = "user-123"
 			const replyRepository = new ReplyRepositoryPostgres(pool, fakeIdGenerator)
 
 			// Action
-			await UsersTableTestHelper.addUser({id: fakeOwner})
-			await RepliesTableTestHelper.addReply({owner: fakeOwner})
+			await CommentsTableTestHelper.addComment({id: "comment-123", threadId: "thread-123"})
+			await RepliesTableTestHelper.addReply({owner: "user-123", commentId: "comment-123"})
 			await replyRepository.deleteReply("reply-123")
 
 			// Assert
@@ -122,16 +117,15 @@ describe("ReplyRepositoryPostgres implementation", () => {
 		it("should not throw NotFoundError when reply exist", async () => {
 			// Arrange
 			const fakeIdGenerator = () => "123"
-			const fakeOwner = "user-123"
 			const replyRepository = new ReplyRepositoryPostgres(pool, fakeIdGenerator)
 
 			// Action
-			await UsersTableTestHelper.addUser({id: fakeOwner})
-			await RepliesTableTestHelper.addReply({owner: fakeOwner})
+			await CommentsTableTestHelper.addComment({id: "comment-123", threadId: "thread-123"})
+			await RepliesTableTestHelper.addReply({owner: "user-123", commentId: "comment-123"})
 			const reply = await replyRepository.getReplyById("reply-123")
 
 			// Assert
-			expect(reply.owner).toBe(fakeOwner)
+			expect(reply.owner).toBe("user-123")
 		})
 	})
 
@@ -140,24 +134,17 @@ describe("ReplyRepositoryPostgres implementation", () => {
 			// Arrange
 			const fakeIdGenerator = () => "123"
 			const replyRepository = new ReplyRepositoryPostgres(pool, fakeIdGenerator)
-			const fakeOwner = "user-123"
-			const content = "Test"
-			// const threadId = "thread-123"
-			const commentId = "comment-123"
 
 			// Action
-			await UsersTableTestHelper.addUser({id: fakeOwner, username: "testing"})
-			await CommentsTableTestHelper.addComment({id: commentId, owner: fakeOwner})
+			await CommentsTableTestHelper.addComment({id: "comment-123", threadId: "thread-123"})
 
-			await RepliesTableTestHelper.addReply({id: "reply-123", owner: fakeOwner})
-			await RepliesTableTestHelper.addReply({id: "reply-456", owner: fakeOwner})
-			await CommentRepliesTableTestHelper.addEntry({id: "comment-reply-1", commentId, replyId: "reply-123"})
-			await CommentRepliesTableTestHelper.addEntry({id: "comment-reply-2", commentId, replyId: "reply-456"})
-			const replies = await replyRepository.getRepliesByCommentId(commentId)
+			await RepliesTableTestHelper.addReply({id: "reply-123", commentId: "comment-123"})
+			await RepliesTableTestHelper.addReply({id: "reply-456", commentId: "comment-123"})
+			const replies = await replyRepository.getRepliesByCommentId("comment-123")
 
 			// Assert
 			expect(replies).toHaveLength(2)
-			expect(replies[0].username).toBe("testing")
+			expect(replies[0].username).toBe("dicoding")
 		})
 	})
 })

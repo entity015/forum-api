@@ -6,12 +6,9 @@ class SeeDetailedThreadUseCase {
 	}
 
 	async execute(useCasePayload) {
-		this._verifyPayload(useCasePayload)
-
 		const { threadId } = useCasePayload
 		const thread = this._translateThreadModel(await this._threadRepository.getThreadById(threadId))
 		const comments = await this._commentRepository.getCommentsByThreadId(threadId)
-		// const mappedComments = comments.map(this._translateCommentModel)
 		this._translateCommentModel = this._translateCommentModel.bind(this)
 		this._translateReplyModel = this._translateReplyModel.bind(this)
 		const mappedComments = await Promise.all(comments.map(this._translateCommentModel))
@@ -20,12 +17,6 @@ class SeeDetailedThreadUseCase {
 			...thread,
 			comments: mappedComments,
 		}
-	}
-
-	_verifyPayload({ threadId }) {
-		if(!threadId) throw new Error("SEE_DETAILED_THREAD_USE_CASE.NOT_CONTAIN_THREAD_ID")
-
-		if(typeof threadId !== "string") throw new Error("SEE_DETAILED_THREAD_USE_CASE.NOT_MEET_DATA_TYPE_SPECIFICATION")
 	}
 
 	_translateThreadModel({ owner, ...rest }) {

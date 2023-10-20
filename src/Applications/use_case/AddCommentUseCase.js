@@ -1,29 +1,18 @@
+const NewComment = require("../../Domains/comments/entities/NewComment")
 const CreatedComment = require("../../Domains/comments/entities/CreatedComment")
 
 class AddCommentUseCase {
-	constructor({ commentRepository, threadRepository, threadCommentRepository }) {
+	constructor({ commentRepository, threadRepository }) {
 		this._commentRepository = commentRepository
 		this._threadRepository = threadRepository
-		this._threadCommentRepository = threadCommentRepository
 	}
 
 	async execute(useCasePayload) {
-		this._verifyPayload(useCasePayload)
-		const { content, threadId, credentialId: owner } = useCasePayload
+		const { content } = new NewComment(useCasePayload)
+		const { threadId, credentialId: owner } = useCasePayload
 		await this._threadRepository.getThreadById(threadId)
-		const createdComment = await this._commentRepository.addComment(content, owner)
-		await this._threadCommentRepository.addEntry(threadId, createdComment.id)
+		const createdComment = await this._commentRepository.addComment(content, owner, threadId)
 		return createdComment
-	}
-
-	_verifyPayload({ content, credentialId, threadId }) {
-		if(!content || !credentialId || !threadId) {
-			throw new Error("ADD_COMMENT_USE_CASE.NOT_CONTAIN_CONTENT")
-		}
-
-		if(typeof content !== "string" || typeof credentialId !== "string" || typeof threadId !== "string") {
-			throw new Error("ADD_COMMENT_USE_CASE.NOT_MEET_DATA_TYPE_SPECIFICATION")
-		}
 	}
 }
 

@@ -3,35 +3,30 @@ const ThreadRepository = require("../../../Domains/threads/ThreadRepository")
 const DeleteCommentUseCase = require("../DeleteCommentUseCase")
 
 describe("DeleteCommentUseCase", () => {
-	it("should throw error if use case payload not contain needed property", async () => {
-		// Arrange
-		const useCasePayload = {}
-		const deleteCommentUseCase = new DeleteCommentUseCase({})
-
-		// Action & Assert
-		await expect(deleteCommentUseCase.execute(useCasePayload))
-			.rejects.toThrowError("DELETE_COMMENT_USE_CASE.NOT_CONTAIN_NEEDED_PROPERTY")
-	})
-
-	it("should throw error if use case paylaoad not meet data type specs", async () => {
-		// Arrange
-		const useCasePayload = { threadId: true, commentId: 1, credentialId: [] }
-		const deleteCommentUseCase = new DeleteCommentUseCase({})
-
-		// Action & Assert
-		await expect(deleteCommentUseCase.execute(useCasePayload))
-			.rejects.toThrowError("DELETE_COMMENT_USE_CASE.NOT_MEET_DATA_TYPE_SPECIFICATION")
-	})
-
 	it("should orchestrating delete comment action correctly", async () => {
 		// Arrange
 		const useCasePayload = { threadId: "thread-123", commentId: "comment-123", credentialId: "user-123" }
+		const mockThread = {
+			id: "thread-123",
+			title: "Test",
+			body: "Test",
+			date: new Date().toISOString(),
+			owner: "user-123",
+			username: "testing",
+		}
+		const mockComment = {
+			id: "comment-123",
+			content: "Test",
+			owner: "user-123",
+			date: new Date().toISOString(),
+			is_deleted: false,
+		}
 		const mockCommentRepository = new CommentRepository()
 		const mockThreadRepository = new ThreadRepository()
 		mockThreadRepository.getThreadById = jest.fn()
-			.mockImplementation(() => Promise.resolve())
+			.mockImplementation(() => Promise.resolve(mockThread))
 		mockCommentRepository.getCommentById = jest.fn()
-			.mockImplementation(() => Promise.resolve())
+			.mockImplementation(() => Promise.resolve(mockComment))
 		mockCommentRepository.verifyCommentOwner = jest.fn()
 			.mockImplementation(() => Promise.resolve())
 		mockCommentRepository.deleteComment = jest.fn()

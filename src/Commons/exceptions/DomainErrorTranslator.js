@@ -19,16 +19,12 @@ DomainErrorTranslator._directories = {
 	"DELETE_AUTHENTICATION_USE_CASE.PAYLOAD_NOT_MEET_DATA_TYPE_SPECIFICATION": new InvariantError("refresh token harus string"),
 	"NEW_THREAD.NOT_CONTAIN_NEEDED_PROPERTY": new InvariantError("tidak dapat membuat thread karena properti tidak lengkap"),
 	"NEW_THREAD.NOT_MEET_DATA_TYPE_SPECIFICATION": new InvariantError("tidak dapat membuat thread karena tipe data tidak sesuai"),
-	"ADD_COMMENT_USE_CASE.NOT_CONTAIN_CONTENT": new InvariantError("harus mengirimkan komentar dan id thread"),
-	"ADD_COMMENT_USE_CASE.NOT_MEET_DATA_TYPE_SPECIFICATION": new InvariantError("komentar harus berupa string"),
-	"DELETE_COMMENT_USE_CASE.NOT_CONTAIN_NEEDED_PROPERTY": new InvariantError("harus mengirimkan id komentar dan id thread"),
-	"DELETE_COMMENT_USE_CASE.NOT_MEET_DATA_TYPE_SPECIFICATION": new InvariantError("id komentar dan thread harus berupa string"),
+	"NEW_COMMENT.NOT_CONTAIN_NEEDED_PROPERTY": new InvariantError("harus mengirimkan konten komentar"),
+	"NEW_COMMENT.NOT_MEET_DATA_TYPE_SPECIFICATION": new InvariantError("komentar harus berupa string"),
 	"SEE_DETAILED_THREAD_USE_CASE.NOT_CONTAIN_THREAD_ID": new InvariantError("harus mengirimkan id thread"),
 	"SEE_DETAILED_THREAD_USE_CASE.NOT_MEET_DATA_TYPE_SPECIFICATION": new InvariantError("id thread harus berupa string"),
-	"ADD_REPLY_USE_CASE.NOT_CONTAIN_CONTENT": new InvariantError("harus mengirimkan balasan beserta id thread dan id komentar"),
-	"ADD_REPLY_USE_CASE.NOT_MEET_DATA_TYPE_SPECIFICATION": new InvariantError("balasan harus berupa string"),
-	"DELETE_REPLY_USE_CASE.NOT_CONTAIN_NEEDED_PROPERTY": new InvariantError("harus mengirimkan id balasan beserta id komentar dan id thread"),
-	"DELETE_REPLY_USE_CASE.NOT_MEET_DATA_TYPE_SPECIFICATION": new InvariantError("id balasan beserta id komentar dan id thread harus berupa string"),
+	"NEW_REPLY.NOT_CONTAIN_NEEDED_PROPERTY": new InvariantError("harus mengirimkan konten balasan"),
+	"NEW_REPLY.NOT_MEET_DATA_TYPE_SPECIFICATION": new InvariantError("balasan harus berupa string"),
 }
 
 module.exports = DomainErrorTranslator

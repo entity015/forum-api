@@ -1,6 +1,5 @@
 const CommentRepository = require("../../../Domains/comments/CommentRepository")
 const ThreadRepository = require("../../../Domains/threads/ThreadRepository")
-const CommentReplyRepository = require("../../../Domains/comment_replies/CommentReplyRepository")
 const ReplyRepository = require("../../../Domains/replies/ReplyRepository")
 const CreatedReply = require("../../../Domains/replies/entities/CreatedReply")
 const AddReplyUseCase = require("../AddReplyUseCase")
@@ -12,7 +11,7 @@ describe("AddReplyUseCase", () => {
 		const addReplyUseCase = new AddReplyUseCase({})
 
 		// Action & Assert
-		await expect(addReplyUseCase.execute(useCasePayload)).rejects.toThrowError("ADD_REPLY_USE_CASE.NOT_CONTAIN_CONTENT")
+		await expect(addReplyUseCase.execute(useCasePayload)).rejects.toThrowError("NEW_REPLY.NOT_CONTAIN_NEEDED_PROPERTY")
 	})
 
 	it("should throw error if content not string", async () => {
@@ -21,7 +20,7 @@ describe("AddReplyUseCase", () => {
 		const addReplyUseCase = new AddReplyUseCase({})
 
 		// Action & Assert
-		await expect(addReplyUseCase.execute(useCasePayload)).rejects.toThrowError("ADD_REPLY_USE_CASE.NOT_MEET_DATA_TYPE_SPECIFICATION")
+		await expect(addReplyUseCase.execute(useCasePayload)).rejects.toThrowError("NEW_REPLY.NOT_MEET_DATA_TYPE_SPECIFICATION")
 	})
 
 	it("should orchestrating add reply action correctly", async () => {
@@ -32,23 +31,34 @@ describe("AddReplyUseCase", () => {
 			content: "Test",
 			owner: "user-123",
 		})
+		const mockThread = {
+			id: "thread-123",
+			title: "Test",
+			body: "Test",
+			date: new Date().toISOString(),
+			owner: "user-123",
+			username: "testing",
+		}
+		const mockComment = {
+			id: "comment-123",
+			content: "Test",
+			owner: "user-123",
+			date: new Date().toISOString(),
+			is_deleted: false,
+		}
 		const mockCommentRepository = new CommentRepository()
 		const mockThreadRepository = new ThreadRepository()
-		const mockCommentReplyRepository = new CommentReplyRepository()
 		const mockReplyRepository = new ReplyRepository()
 		mockThreadRepository.getThreadById = jest.fn()
-			.mockImplementation(() => Promise.resolve())
+			.mockImplementation(() => Promise.resolve(mockThread))
 		mockCommentRepository.getCommentById = jest.fn()
-			.mockImplementation(() => Promise.resolve())
+			.mockImplementation(() => Promise.resolve(mockComment))
 		mockReplyRepository.addReply = jest.fn()
 			.mockImplementation(() => Promise.resolve(mockCreatedReply))
-		mockCommentReplyRepository.addEntry = jest.fn()
-			.mockImplementation(() => Promise.resolve())
 
 		const addReplyUseCase = new AddReplyUseCase({
 			commentRepository: mockCommentRepository,
 			threadRepository: mockThreadRepository,
-			commentReplyRepository: mockCommentReplyRepository,
 			replyRepository: mockReplyRepository,
 		})
 
@@ -61,9 +71,7 @@ describe("AddReplyUseCase", () => {
 		expect(mockCommentRepository.getCommentById)
 			.toBeCalledWith(useCasePayload.commentId)
 		expect(mockReplyRepository.addReply)
-			.toBeCalledWith(useCasePayload.content, useCasePayload.credentialId)
-		expect(mockCommentReplyRepository.addEntry)
-			.toBeCalledWith(useCasePayload.commentId, createdReply.id)
+			.toBeCalledWith(useCasePayload.content, useCasePayload.credentialId, useCasePayload.commentId)
 		expect(createdReply).toStrictEqual(new CreatedReply({
 			id: "reply-123",
 			content: "Test",

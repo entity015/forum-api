@@ -1,7 +1,5 @@
 class DeleteAuthenticationUseCase {
-	constructor({
-		authenticationRepository,
-	}) {
+	constructor({ authenticationRepository }) {
 		this._authenticationRepository = authenticationRepository
 	}
 

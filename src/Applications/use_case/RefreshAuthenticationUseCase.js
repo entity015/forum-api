@@ -1,8 +1,5 @@
 class RefreshAuthenticationUseCase {
-	constructor({
-		authenticationRepository,
-		authenticationTokenManager,
-	}) {
+	constructor({ authenticationRepository, authenticationTokenManager }) {
 		this._authenticationRepository = authenticationRepository
 		this._authenticationTokenManager = authenticationTokenManager
 	}

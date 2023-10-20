@@ -2,12 +2,7 @@ const UserLogin = require("../../Domains/users/entities/UserLogin")
 const NewAuthentication = require("../../Domains/authentications/entities/NewAuth")
 
 class LoginUserUseCase {
-	constructor({
-		userRepository,
-		authenticationRepository,
-		authenticationTokenManager,
-		passwordHash,
-	}) {
+	constructor({ userRepository, authenticationRepository, authenticationTokenManager, passwordHash }) {
 		this._userRepository = userRepository
 		this._authenticationRepository = authenticationRepository
 		this._authenticationTokenManager = authenticationTokenManager
@@ -18,7 +13,6 @@ class LoginUserUseCase {
 		const { username, password } = new UserLogin(useCasePayload)
 
 		const encryptedPassword = await this._userRepository.getPasswordByUsername(username)
-
 		await this._passwordHash.comparePassword(password, encryptedPassword)
 
 		const id = await this._userRepository.getIdByUsername(username)

@@ -21,7 +21,7 @@ class ReplyRepositoryPostgres extends ReplyRepository {
 
 		const result = await this._pool.query(query)
 
-		return new CreatedReply({ ...result.rows[0] })
+		return new CreatedReply(result.rows[0])
 	}
 
 	async verifyReplyOwner(replyId, owner) {

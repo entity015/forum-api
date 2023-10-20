@@ -1,16 +1,17 @@
 class SeeDetailedThreadUseCase {
-	constructor({ threadRepository, commentRepository , replyRepository }) {
+	constructor({ threadRepository, commentRepository, replyRepository }) {
 		this._threadRepository = threadRepository
 		this._commentRepository = commentRepository
 		this._replyRepository = replyRepository
+
+		this._translateCommentModel = this._translateCommentModel.bind(this)
+		this._translateReplyModel = this._translateReplyModel.bind(this)
 	}
 
 	async execute(useCasePayload) {
 		const { threadId } = useCasePayload
 		const thread = this._translateThreadModel(await this._threadRepository.getThreadById(threadId))
 		const comments = await this._commentRepository.getCommentsByThreadId(threadId)
-		this._translateCommentModel = this._translateCommentModel.bind(this)
-		this._translateReplyModel = this._translateReplyModel.bind(this)
 		const mappedComments = await Promise.all(comments.map(this._translateCommentModel))
 
 		return {
@@ -20,9 +21,7 @@ class SeeDetailedThreadUseCase {
 	}
 
 	_translateThreadModel({ owner, ...rest }) {
-		return {
-			...rest,
-		}
+		return rest
 	}
 
 	async _translateCommentModel({ owner, is_deleted, content, id, ...rest }) {

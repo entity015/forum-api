@@ -1,8 +1,9 @@
 class SeeDetailedThreadUseCase {
-	constructor({ threadRepository, commentRepository, replyRepository }) {
+	constructor({ threadRepository, commentRepository, replyRepository, likesRepository }) {
 		this._threadRepository = threadRepository
 		this._commentRepository = commentRepository
 		this._replyRepository = replyRepository
+		this._likesRepository = likesRepository
 
 		this._translateCommentModel = this._translateCommentModel.bind(this)
 		this._translateReplyModel = this._translateReplyModel.bind(this)
@@ -28,12 +29,15 @@ class SeeDetailedThreadUseCase {
 		// istanbul ignore next
 		content = is_deleted ? "**komentar telah dihapus**" : content
 		const replies = await this._replyRepository.getRepliesByCommentId(id)
+		const likes = await this._likesRepository.getLikesByCommentId(id)
+		const filteredLikes = likes.filter(e => e.is_liked === true)
 		const mappedReplies = replies.map(this._translateReplyModel)
 		return {
 			id,
 			...rest,
 			content,
 			replies: mappedReplies,
+			likeCount: filteredLikes.length,
 		}
 	}
 

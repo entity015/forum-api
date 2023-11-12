@@ -1,6 +1,8 @@
 const pool = require("../../database/postgres/pool")
 const ThreadsTableTestHelper = require("../../../../tests/ThreadsTableTestHelper")
 const UsersTableTestHelper = require("../../../../tests/UsersTableTestHelper")
+const CommentsTableTestHelper = require("../../../../tests/CommentsTableTestHelper")
+const LikesTableTestHelper = require("../../../../tests/LikesTableTestHelper")
 const container = require("../../container")
 const createServer = require("../createServer")
 
@@ -107,6 +109,8 @@ describe("/threads endpoint", () => {
 
 			// Action
 			await ThreadsTableTestHelper.addThread({id: "thread-123"})
+			await CommentsTableTestHelper.addComment({id: "comment-123", threadId: "thread-123"})
+			await LikesTableTestHelper.addLike("user-123", "comment-123")
 			const response = await server.inject({
 				method: "GET",
 				url: "/threads/thread-123",
@@ -117,6 +121,7 @@ describe("/threads endpoint", () => {
 			expect(response.statusCode).toEqual(200)
 			expect(responseJson.status).toEqual("success")
 			expect(responseJson.data.thread).toBeDefined()
+			expect(responseJson.data.thread.comments[0].likeCount).toEqual(1)
 		})
 
 		it("should response 404 when thread not exist", async () => {

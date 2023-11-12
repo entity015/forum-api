@@ -30,13 +30,14 @@ class SeeDetailedThreadUseCase {
 		content = is_deleted ? "**komentar telah dihapus**" : content
 		const replies = await this._replyRepository.getRepliesByCommentId(id)
 		const likes = await this._likesRepository.getLikesByCommentId(id)
+		const filteredLikes = likes.filter(e => e.is_liked === true)
 		const mappedReplies = replies.map(this._translateReplyModel)
 		return {
 			id,
 			...rest,
 			content,
 			replies: mappedReplies,
-			likeCount: likes.length,
+			likeCount: filteredLikes.length,
 		}
 	}
 

@@ -19,6 +19,8 @@ const CommentRepository = require("../Domains/comments/CommentRepository")
 const CommentRepositoryPostgres = require("./repository/CommentRepositoryPostgres")
 const ReplyRepository = require("../Domains/replies/ReplyRepository")
 const ReplyRepositoryPostgres = require("./repository/ReplyRepositoryPostgres")
+const LikesRepository = require("../Domains/likes/LikesRepository")
+const LikesRepositoryPostgres = require("./repository/LikesRepositoryPostgres")
 
 const PasswordHash = require("../Applications/security/PasswordHash")
 const BcryptPasswordHash = require("./security/BcryptPasswordHash")
@@ -36,6 +38,7 @@ const DeleteCommentUseCase = require("../Applications/use_case/DeleteCommentUseC
 const AddReplyUseCase = require("../Applications/use_case/AddReplyUseCase")
 const DeleteReplyUseCase = require("../Applications/use_case/DeleteReplyUseCase")
 const SeeDetailedThreadUseCase = require("../Applications/use_case/SeeDetailedThreadUseCase")
+const SwitchLikeUseCase = require("../Applications/use_case/SwitchLikeUseCase")
 
 // creating container
 const container = createContainer()
@@ -116,6 +119,15 @@ container.register([
 			dependencies: [
 				{ concrete: pool },
 				{ concrete: nanoid },
+			]
+		}
+	},
+	{
+		key: LikesRepository.name,
+		Class: LikesRepositoryPostgres,
+		parameter: {
+			dependencies: [
+				{ concrete: pool },
 			]
 		}
 	},
@@ -301,6 +313,31 @@ container.register([
 				{
 					name: "replyRepository",
 					internal: ReplyRepository.name,
+				},
+				{
+					name: "likesRepository",
+					internal: LikesRepository.name,
+				},
+			]
+		}
+	},
+	{
+		key: SwitchLikeUseCase.name,
+		Class: SwitchLikeUseCase,
+		parameter: {
+			injectType: "destructuring",
+			dependencies: [
+				{
+					name: "threadRepository",
+					internal: ThreadRepository.name,
+				},
+				{
+					name: "commentRepository",
+					internal: CommentRepository.name,
+				},
+				{
+					name: "likesRepository",
+					internal: LikesRepository.name,
 				},
 			]
 		}

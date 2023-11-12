@@ -1,6 +1,7 @@
 const ReplyRepository = require("../../../Domains/replies/ReplyRepository")
 const CommentRepository = require("../../../Domains/comments/CommentRepository")
 const ThreadRepository = require("../../../Domains/threads/ThreadRepository")
+const LikesRepository = require("../../../Domains/likes/LikesRepository")
 const SeeDetailedThreadUseCase = require("../SeeDetailedThreadUseCase")
 
 describe("SeeDetailedThreadUseCase", () => {
@@ -36,20 +37,36 @@ describe("SeeDetailedThreadUseCase", () => {
 				username: "testing",
 			}
 		]
+		const mockLikes = [
+			{
+				owner: "user-456",
+				is_liked: true,
+				comment_id: "comment-123",
+			},
+			{
+				owner: "user-123",
+				is_liked: false,
+				comment_id: "comment-123",
+			}
+		]
 		const mockThreadRepository = new ThreadRepository()
 		const mockCommentRepository = new CommentRepository()
 		const mockReplyRepository = new ReplyRepository()
+		const mockLikesRepository = new LikesRepository()
 		mockThreadRepository.getThreadById = jest.fn()
 			.mockImplementation(() => Promise.resolve(mockThread))
 		mockCommentRepository.getCommentsByThreadId = jest.fn()
 			.mockImplementation(() => Promise.resolve(mockComments))
 		mockReplyRepository.getRepliesByCommentId = jest.fn()
 			.mockImplementation(() => Promise.resolve(mockReplies))
+		mockLikesRepository.getLikesByCommentId = jest.fn()
+			.mockImplementation(() => Promise.resolve(mockLikes))
 
 		const seeDetailedThreadUseCase = new SeeDetailedThreadUseCase({
 			threadRepository: mockThreadRepository,
 			commentRepository: mockCommentRepository,
 			replyRepository: mockReplyRepository,
+			likesRepository: mockLikesRepository,
 		})
 		const spyTranslateComment = jest.spyOn(seeDetailedThreadUseCase, "_translateCommentModel")
 		const spyTranslateReply = jest.spyOn(seeDetailedThreadUseCase, "_translateReplyModel")
@@ -85,7 +102,8 @@ describe("SeeDetailedThreadUseCase", () => {
 							username: "testing",
 							date: now,
 						}
-					]
+					],
+					likeCount: 1,
 				}
 			],
 		})
